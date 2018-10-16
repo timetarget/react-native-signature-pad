@@ -1,12 +1,7 @@
 'use strict';
 
-import React, { Component, PropTypes } from 'react';
-import {
-  View,
-  WebView,
-  StyleSheet,
-} from 'react-native';
-
+import React, { Component } from 'react';
+import { WebView, StyleSheet, Platform } from 'react-native';
 
 import htmlContent from './injectedHtml';
 import injectedSignaturePad from './injectedJavaScript/signaturePad';
@@ -14,16 +9,12 @@ import injectedApplication from './injectedJavaScript/application';
 import injectedErrorHandler from './injectedJavaScript/errorHandler';
 import injectedExecuteNativeFunction from './injectedJavaScript/executeNativeFunction';
 
+const WEBVIEW_STYLE_FIXES = Platform.select({
+  ios: {},
+  android: { marginBottom: -12, marginHorizontal: -5 }
+});
+
 class SignaturePad extends Component {
-
-  static propTypes = {
-    onChange: PropTypes.func,
-    onError: PropTypes.func,
-    style: View.propTypes.style,
-    penColor: PropTypes.string,
-    dataURL: PropTypes.string,
-  };
-
   static defaultProps = {
     onChange: () => {
     },
@@ -40,7 +31,7 @@ class SignaturePad extends Component {
     var injectedJavaScript = injectedExecuteNativeFunction
       + injectedErrorHandler
       + injectedSignaturePad
-      + injectedApplication(props.penColor, backgroundColor, props.dataURL);
+      + injectedApplication(props.penColor, backgroundColor, props.dataURL, props.defaultHeight, props.defaultWidth);
     var html = htmlContent(injectedJavaScript);
     this.source = {html}; //We don't use WebView's injectedJavaScript because on Android, the WebView re-injects the JavaScript upon every url change. Given that we use url changes to communicate signature changes to the React Native app, the JS is re-injected every time a stroke is drawn.
   }
@@ -115,15 +106,22 @@ class SignaturePad extends Component {
 
   };
 
+  onMessage = (event) => {
+    var base64DataUrl = JSON.parse(event.nativeEvent.data);
+    this._bridged_finishedStroke(base64DataUrl);
+  }
+
   render = () => {
     return (
         <WebView automaticallyAdjustContentInsets={false}
                  onNavigationStateChange={this._onNavigationChange}
+                 onMessage={this.onMessage}
                  renderError={this._renderError}
                  renderLoading={this._renderLoading}
                  source={this.source}
+                 scrollEnabled={false}
                  javaScriptEnabled={true}
-                 style={this.props.style}/>
+                 style={[this.props.style, WEBVIEW_STYLE_FIXES]}/>
     )
   };
 }

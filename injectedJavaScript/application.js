@@ -1,5 +1,4 @@
-var content = (penColor, backgroundColor, dataURL, defaultHeight, defaultWidth) => `
-
+var content = (penColor, backgroundColor, dataURL, defaultHeight, defaultWidth, penSize) => `
   var showSignaturePad = function (signaturePadCanvas, bodyWidth, bodyHeight) {
     var width = bodyWidth;
     var height = bodyHeight;
@@ -29,8 +28,8 @@ var content = (penColor, backgroundColor, dataURL, defaultHeight, defaultWidth) 
         point.x = translatedX;
         point.y = translatedY;
       }; */
-      signaturePad.minWidth = 1;
-      signaturePad.maxWidth = 4;
+      signaturePad.minWidth = ${penSize};
+      signaturePad.maxWidth = ${penSize};
       if ('${dataURL}') {
         signaturePad.fromDataURL('${dataURL}');
       }

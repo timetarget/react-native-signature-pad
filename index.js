@@ -8,6 +8,11 @@ import injectedApplication from './injectedJavaScript/application';
 import injectedErrorHandler from './injectedJavaScript/errorHandler';
 import injectedExecuteNativeFunction from './injectedJavaScript/executeNativeFunction';
 
+const WEBVIEW_STYLE_FIXES = Platform.select({
+  ios: {},
+  android: { marginBottom: -12, marginHorizontal: -5 }
+});
+
 class SignaturePad extends Component {
   static defaultProps = {
     onChange: Function.prototype,
@@ -114,7 +119,7 @@ class SignaturePad extends Component {
         source={this.source}
         scrollEnabled={false}
         javaScriptEnabled={true}
-        style={this.props.style}
+        style={[this.props.style, WEBVIEW_STYLE_FIXES]}
       />
     );
   };

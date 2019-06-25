@@ -1,6 +1,7 @@
 'use strict';
 import React, { Component } from 'react';
-import { WebView, StyleSheet, Platform } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
+import { WebView } from "react-native-webview";
 
 import htmlContent from './injectedHtml';
 import injectedSignaturePad from './injectedJavaScript/signaturePad';
@@ -104,7 +105,8 @@ class SignaturePad extends Component {
   };
 
   onMessage = (event) => {
-    this._bridged_finishedStroke(event.nativeEvent.data);
+    var base64DataUrl = JSON.parse(event.nativeEvent.data);
+    this._bridged_finishedStroke(base64DataUrl);
   }
 
   render () {

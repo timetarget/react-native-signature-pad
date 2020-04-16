@@ -1,14 +1,19 @@
+
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import {StyleSheet, View, ViewPropTypes} from 'react-native';
+import {StyleSheet, Platform, ViewPropTypes} from 'react-native';
 import {WebView} from 'react-native-webview';
-
 
 import htmlContent from './injectedHtml';
 import injectedSignaturePad from './injectedJavaScript/signaturePad';
 import injectedApplication from './injectedJavaScript/application';
 import injectedErrorHandler from './injectedJavaScript/errorHandler';
 import injectedExecuteNativeFunction from './injectedJavaScript/executeNativeFunction';
+
+const WEBVIEW_STYLE_FIXES = Platform.select({
+  ios: {},
+  android: { marginBottom: -12, marginHorizontal: -5 }
+});
 
 export default class SignaturePad extends Component {
 
@@ -21,12 +26,10 @@ export default class SignaturePad extends Component {
   };
 
   static defaultProps = {
-    onChange: () => {
-    },
-    onError: () => {
-
-    },
-    style: {}
+    onChange: Function.prototype,
+    onError: Function.prototype,
+    style: {},
+    penSize: Platform.select({ ios: 7, android: 2 })
   };
 
   constructor(props) {
@@ -36,7 +39,7 @@ export default class SignaturePad extends Component {
     var injectedJavaScript = injectedExecuteNativeFunction
       + injectedErrorHandler
       + injectedSignaturePad
-      + injectedApplication(props.penColor, backgroundColor, props.dataURL);
+      + injectedApplication(props.penColor, backgroundColor, props.dataURL, props.defaultHeight, props.defaultWidth, props.penSize);
     var html = htmlContent(injectedJavaScript);
     this.source = {html}; //We don't use WebView's injectedJavaScript because on Android, the WebView re-injects the JavaScript upon every url change. Given that we use url changes to communicate signature changes to the React Native app, the JS is re-injected every time a stroke is drawn.
   }
@@ -116,7 +119,7 @@ export default class SignaturePad extends Component {
     this._bridged_finishedStroke(base64DataUrl);
   }
 
-  render = () => {
+  render () {
     return (
         <WebView automaticallyAdjustContentInsets={false}
                  onNavigationStateChange={this._onNavigationChange}
@@ -124,9 +127,11 @@ export default class SignaturePad extends Component {
                  renderError={this._renderError}
                  renderLoading={this._renderLoading}
                  source={this.source}
+                 scrollEnabled={false}
                  javaScriptEnabled={true}
-                 style={this.props.style}/>
-    )
+                 style={[this.props.style, WEBVIEW_STYLE_FIXES]}
+        />
+    );
   };
 }
 
